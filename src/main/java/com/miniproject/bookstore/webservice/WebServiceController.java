@@ -61,8 +61,8 @@ public class WebServiceController {
 
     // 4. DELETE - Delete book details by id .
     @DeleteMapping("/book/{id}")
-    public void deleteBook(@PathVariable Long id){
-        this.bookService.deleteBookById(id);
+    public Book deleteBook(@PathVariable Long id){
+        return this.bookService.deleteBookById(id);
     }
 
 

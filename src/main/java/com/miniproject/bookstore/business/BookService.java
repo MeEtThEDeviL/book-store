@@ -2,6 +2,9 @@ package com.miniproject.bookstore.business;
 
 import com.miniproject.bookstore.data.Book;
 import com.miniproject.bookstore.data.BookRepository;
+import com.miniproject.bookstore.error.exceptions.EntityAlreadyExistsException;
+import com.miniproject.bookstore.error.exceptions.EntityNotFoundException;
+import com.miniproject.bookstore.error.exceptions.InvalidEntityException;
 import org.springframework.stereotype.Service;
 
 
@@ -19,9 +22,21 @@ public class BookService {
     }
 
     public Book addBook(Book book){
-        if(null == book){
-            throw new RuntimeException("Book cannot be null");
+
+        System.out.println("Book to be added: " + book);
+
+        if(book.getBookName() == null){
+            throw new InvalidEntityException("Book name cannot be null!");
         }
+
+        List<Book> filterBooks = filterBooks(
+                book.getStream(), book.getAuthor(), book.getPublisher(), book.getYearOfPublication(), book.getBookName()
+        );
+
+        if(!filterBooks.isEmpty()){
+            throw new EntityAlreadyExistsException("Book with given book details already exist!");
+        }
+
         return this.bookRepository.save(book);
 
     }
@@ -58,8 +73,10 @@ public class BookService {
         return filteredBooks;
     }*/
 
-    public void deleteBookById(Long id){
+    public Book deleteBookById(Long id){
+        Book book = this.bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Book with given ID: " + id + " not found"));
         this.bookRepository.deleteById(id);
+        return book;
 
     }
 
@@ -89,8 +106,9 @@ public class BookService {
             }
 
             return this.bookRepository.save(bookGot);
+        } else {
+            throw new EntityNotFoundException("Book with given ID: " + id + " not Found");
         }
-        return null;
 
     }
 
