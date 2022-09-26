@@ -183,11 +183,6 @@ public class WebServiceControllerTest {
         verify(bookService, times(1)).updateBookDetails(anyLong(), any(Book.class));
     }
 
-    @Test
-    @DisplayName("Delete book by Id")
-    public void testDeleteMappingDeleteBookById(){
-
-    }
 
 
 }

@@ -3,7 +3,8 @@ package com.miniproject.bookstore;
 import com.miniproject.bookstore.business.BookService;
 import com.miniproject.bookstore.data.Book;
 import com.miniproject.bookstore.data.BookRepository;
-import org.apache.catalina.LifecycleState;
+import com.miniproject.bookstore.error.exceptions.EntityAlreadyExistsException;
+import com.miniproject.bookstore.error.exceptions.InvalidEntityException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -75,11 +75,40 @@ public class BookServiceTest {
         verify(bookRepository, times(1)).save(any());
     }
 
+
+
     @Test
-    @DisplayName("Given null book to throws RuntimeException")
-    public void testAddNullBook(){
-        assertThrows(RuntimeException.class, () -> bookService.addBook(null));
-        verify(bookRepository, times(0)).save(any());
+    @DisplayName("Inserting same book again throws EntityAlreadyExistsException")
+    public void testAddSameBook(){
+        List<Book> filteredBooks = new ArrayList<>();
+        filteredBooks.add(book1);
+        when(bookRepository.filterBooksByParameters(
+                book1.getStream(), book1.getAuthor(), book1.getPublisher(), book1.getYearOfPublication(), book1.getBookName())
+        ).thenReturn(filteredBooks);
+
+
+        assertThrows(EntityAlreadyExistsException.class, () -> bookService.addBook(book1));
+    }
+
+    @Test
+    @DisplayName("Given book without bookName throws InvalidEntityException")
+    public void testAddBookWithNullBookName(){
+        book1.setBookName(null);
+        assertThrows(InvalidEntityException.class, () -> bookService.addBook(book1));
+    }
+
+    @Test
+    @DisplayName("Adding book with -Ve yearOfPublication throws InvalidEntityException")
+    public void testAddBookWithNegativeYearOfPublication(){
+        book1.setYearOfPublication(-1);
+        assertThrows(InvalidEntityException.class, () -> bookService.addBook(book1));
+    }
+
+    @Test
+    @DisplayName("Adding book with greater than current year yearOfPublication throws InvalidEntityException")
+    public void testAddBookWithGreaterThanCurrentYearYearOfPublication(){
+        book1.setYearOfPublication(3000);
+        assertThrows(InvalidEntityException.class, () -> bookService.addBook(book1));
     }
 
     @Test
@@ -89,14 +118,14 @@ public class BookServiceTest {
         ExpectedBookList.add(book1);
         ExpectedBookList.add(book2);
 
-        when(bookRepository.filterBooksByStreamAuthorPublisherYearOfPublicationBookName(
+        when(bookRepository.filterBooksByParameters(
                 "Engineering", null, null, null, null)
         ).thenReturn(ExpectedBookList);
 
         List<Book> actualBookList = bookService.filterBooks("Engineering", null, null, null, null);
 
         assertIterableEquals(ExpectedBookList, actualBookList);
-        verify(bookRepository, times(1)).filterBooksByStreamAuthorPublisherYearOfPublicationBookName(
+        verify(bookRepository, times(1)).filterBooksByParameters(
                 "Engineering", null, null, null, null
         );
     }
@@ -116,19 +145,12 @@ public class BookServiceTest {
 
         Book actualBook = bookService.updateBookDetails(1L, updateParamBook);
 
-        assertSame(book1, actualBook);
+        assertEquals(book1, actualBook);
 
         verify(bookRepository, times(1)).findById(1L);
         verify(bookRepository, times(1)).save(book1);
 
     }
 
-
-    @Test
-    @DisplayName("Delete Book With Given BookId")
-    public void testDeleteBookById(){
-
-
-    }
 
 }

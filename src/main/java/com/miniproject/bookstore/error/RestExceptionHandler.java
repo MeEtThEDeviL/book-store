@@ -1,7 +1,7 @@
 package com.miniproject.bookstore.error;
 
-import com.miniproject.bookstore.error.exceptions.EntityAlreadyExistsException;
 import com.miniproject.bookstore.error.exceptions.EntityNotFoundException;
+import com.miniproject.bookstore.error.exceptions.EntityAlreadyExistsException;
 import com.miniproject.bookstore.error.exceptions.InvalidEntityException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

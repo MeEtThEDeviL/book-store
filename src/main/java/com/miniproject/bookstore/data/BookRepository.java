@@ -15,7 +15,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     + "and (:publisher is null or book.publisher = :publisher) "
     + "and (:yearOfPublication is null or book.yearOfPublication = :yearOfPublication) "
     + "and (:bookName is null or book.bookName = :bookName) ")
-    List<Book> filterBooksByStreamAuthorPublisherYearOfPublicationBookName(
+    List<Book> filterBooksByParameters(
             @Param("stream")String stream,
             @Param("author")String author,
             @Param("publisher")String publisher,

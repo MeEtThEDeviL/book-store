@@ -8,6 +8,7 @@ import com.miniproject.bookstore.error.exceptions.InvalidEntityException;
 import org.springframework.stereotype.Service;
 
 
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,12 @@ public class BookService {
             throw new InvalidEntityException("Book name cannot be null!");
         }
 
+
+        if(book.getYearOfPublication() < 0 || book.getYearOfPublication() > Year.now().getValue()){
+            throw new InvalidEntityException("Invalid year of publication");
+        }
+
+
         List<Book> filterBooks = filterBooks(
                 book.getStream(), book.getAuthor(), book.getPublisher(), book.getYearOfPublication(), book.getBookName()
         );
@@ -43,35 +50,14 @@ public class BookService {
 
     public List<Book> filterBooks( String stream, String author, String publisher, Long yearOfPublication, String bookName){
 
-        List<Book> filteredBooks = this.bookRepository.filterBooksByStreamAuthorPublisherYearOfPublicationBookName(
+        List<Book> filteredBooks = this.bookRepository.filterBooksByParameters(
                 stream, author, publisher, yearOfPublication, bookName
         );
 
         return filteredBooks;
     }
 
-    // New Filter books
-   /*public List<Book> filterBooksNewService( String stream, String author, String publisher, Long yearOfPublication, String bookName){
-        long yearOfPublicationPass;
 
-        if(yearOfPublication == null){
-            yearOfPublicationPass = -1L;
-        } else{
-            yearOfPublicationPass = yearOfPublication.longValue();
-        }
-
-        Book bookDetails = new Book();
-
-        bookDetails.setBookName(bookName);
-        bookDetails.setAuthor(author);
-        bookDetails.setStream(stream);
-        bookDetails.setYearOfPublication(yearOfPublicationPass);
-        bookDetails.setPublisher(publisher);
-
-        List<Book> filteredBooks = this.bookRepository.filterBooksByBookDetails(bookDetails);
-
-        return filteredBooks;
-    }*/
 
     public Book deleteBookById(Long id){
         Book book = this.bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Book with given ID: " + id + " not found"));
@@ -101,8 +87,10 @@ public class BookService {
                 bookGot.setPublisher(bookDetails.getPublisher());
             }
 
-            if (bookDetails.getYearOfPublication() != 0) {
+            if (bookDetails.getYearOfPublication() > 0 && bookDetails.getYearOfPublication() < Year.now().getValue()) {
                 bookGot.setYearOfPublication(bookDetails.getYearOfPublication());
+            } else {
+                throw new InvalidEntityException("Invalid Year of publication");
             }
 
             return this.bookRepository.save(bookGot);
@@ -111,5 +99,28 @@ public class BookService {
         }
 
     }
+
+    // New Filter books
+   /*public List<Book> filterBooksNewService( String stream, String author, String publisher, Long yearOfPublication, String bookName){
+        long yearOfPublicationPass;
+
+        if(yearOfPublication == null){
+            yearOfPublicationPass = -1L;
+        } else{
+            yearOfPublicationPass = yearOfPublication.longValue();
+        }
+
+        Book bookDetails = new Book();
+
+        bookDetails.setBookName(bookName);
+        bookDetails.setAuthor(author);
+        bookDetails.setStream(stream);
+        bookDetails.setYearOfPublication(yearOfPublicationPass);
+        bookDetails.setPublisher(publisher);
+
+        List<Book> filteredBooks = this.bookRepository.filterBooksByBookDetails(bookDetails);
+
+        return filteredBooks;
+    }*/
 
 }
