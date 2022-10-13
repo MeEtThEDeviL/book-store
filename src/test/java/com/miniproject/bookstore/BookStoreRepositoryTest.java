@@ -69,11 +69,12 @@ public class BookStoreRepositoryTest {
     @Test
     @DisplayName("Saving book")
     public void testBookSave(){
+        long booksCount = bookRepository.count();
         Book bookResult = bookRepository.save(book1);
         // As bookId is generated value
         book1.setBookId(bookResult.getBookId());
         assertEquals(book1, bookResult);
-        assertEquals(1, bookRepository.count());
+        assertEquals(booksCount + 1, bookRepository.count());
 
 
     }
@@ -112,12 +113,12 @@ public class BookStoreRepositoryTest {
     @Test
     @DisplayName("Delete book by BookId")
     public void testDeleteById(){
+        long booksCount = bookRepository.count();
         Book bookUploaded = bookRepository.save(book1);
-
         bookRepository.deleteById(bookUploaded.getBookId());
         Optional<Book> bookResult = bookRepository.findById(bookUploaded.getBookId());
         assertFalse(bookResult.isPresent());
-        assertEquals(0, bookRepository.count());
+        assertEquals(booksCount, bookRepository.count());
 
     }
 

@@ -2,6 +2,8 @@ package com.miniproject.bookstore.business;
 
 import com.miniproject.bookstore.data.Book;
 import com.miniproject.bookstore.data.BookRepository;
+import com.miniproject.bookstore.data.Photo;
+import com.miniproject.bookstore.data.PhotoRepository;
 import com.miniproject.bookstore.error.exceptions.EntityAlreadyExistsException;
 import com.miniproject.bookstore.error.exceptions.EntityNotFoundException;
 import com.miniproject.bookstore.error.exceptions.InvalidEntityException;
@@ -17,9 +19,11 @@ import java.util.Optional;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final PhotoRepository photoRepository;
 
-    public BookService(BookRepository bookRepository){
+    public BookService(BookRepository bookRepository, PhotoRepository photoRepository){
         this.bookRepository = bookRepository;
+        this.photoRepository = photoRepository;
     }
 
     public Book addBook(Book book){
@@ -89,7 +93,7 @@ public class BookService {
 
             if (bookDetails.getYearOfPublication() > 0 && bookDetails.getYearOfPublication() < Year.now().getValue()) {
                 bookGot.setYearOfPublication(bookDetails.getYearOfPublication());
-            } else {
+            } else if(bookDetails.getYearOfPublication() != 0){
                 throw new InvalidEntityException("Invalid Year of publication");
             }
 
@@ -98,6 +102,19 @@ public class BookService {
             throw new EntityNotFoundException("Book with given ID: " + id + " not Found");
         }
 
+    }
+
+    public Book addPhotoToBook(Long bookId, Long photoId){
+       Book book = bookRepository.findById(bookId).get();
+       Photo photo = photoRepository.findById(photoId).get();
+
+       book.setPhoto(photo);
+       bookRepository.save(book);
+       return book;
+    }
+
+    public Photo addPhoto(Photo photo){
+        return this.photoRepository.save(photo);
     }
 
     // New Filter books

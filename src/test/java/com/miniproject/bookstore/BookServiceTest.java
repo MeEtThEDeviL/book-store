@@ -4,6 +4,7 @@ import com.miniproject.bookstore.business.BookService;
 import com.miniproject.bookstore.data.Book;
 import com.miniproject.bookstore.data.BookRepository;
 import com.miniproject.bookstore.error.exceptions.EntityAlreadyExistsException;
+import com.miniproject.bookstore.error.exceptions.EntityNotFoundException;
 import com.miniproject.bookstore.error.exceptions.InvalidEntityException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -150,6 +152,32 @@ public class BookServiceTest {
         verify(bookRepository, times(1)).findById(1L);
         verify(bookRepository, times(1)).save(book1);
 
+    }
+
+    @Test
+    @DisplayName("Delete book by present bookId returns deleted book")
+    public void testDeleteBookById(){
+        Optional<Book> bookReturned = Optional.of(book1);
+
+        when(bookRepository.findById(book1.getBookId())).thenReturn(bookReturned);
+
+        Book actualBook = bookService.deleteBookById(book1.getBookId());
+
+        assertEquals(actualBook, book1);
+
+        verify(bookRepository, times(1)).findById(book1.getBookId());
+    }
+
+    @Test
+    @DisplayName("Delete book by absent bookId throws EntityNotFoundException")
+    public void testDeleteBookByAbsentBookId(){
+        Optional<Book> emptyOptional = Optional.empty();
+
+        when(bookRepository.findById(anyLong())).thenReturn(emptyOptional);
+
+        assertThrows(EntityNotFoundException.class, () -> bookService.deleteBookById(127L));
+
+        verify(bookRepository, times(1)).findById(anyLong());
     }
 
 
