@@ -26,6 +26,18 @@ public class Book {
     @Column(name = "YEAR_OF_PUBLICATION")
     private long yearOfPublication;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "PHOTO_ID")
+    private Photo photo;
+
+    public Photo getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Photo photo) {
+        this.photo = photo;
+    }
+
     public long getBookId() {
         return bookId;
     }
@@ -78,6 +90,7 @@ public class Book {
     public String toString() {
         return "Book{" +
                 "bookId=" + bookId +
+                ", name='" + bookName + '\'' +
                 ", stream='" + stream + '\'' +
                 ", author='" + author + '\'' +
                 ", publisher='" + publisher + '\'' +

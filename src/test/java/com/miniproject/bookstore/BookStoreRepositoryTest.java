@@ -69,11 +69,12 @@ public class BookStoreRepositoryTest {
     @Test
     @DisplayName("Saving book")
     public void testBookSave(){
+        long booksCount = bookRepository.count();
         Book bookResult = bookRepository.save(book1);
         // As bookId is generated value
         book1.setBookId(bookResult.getBookId());
-        assertSame(book1, bookResult);
-        assertEquals(1, bookRepository.count());
+        assertEquals(book1, bookResult);
+        assertEquals(booksCount + 1, bookRepository.count());
 
 
     }
@@ -91,7 +92,7 @@ public class BookStoreRepositoryTest {
         assertTrue(bookResult.isPresent());
         assumingThat(bookResult.isPresent(), () -> {
             book1.setBookId(bookResult.get().getBookId());
-            assertSame(bookUploaded, bookResult.get());
+            assertEquals(bookUploaded, bookResult.get());
         });
     }
 
@@ -112,12 +113,12 @@ public class BookStoreRepositoryTest {
     @Test
     @DisplayName("Delete book by BookId")
     public void testDeleteById(){
+        long booksCount = bookRepository.count();
         Book bookUploaded = bookRepository.save(book1);
-
         bookRepository.deleteById(bookUploaded.getBookId());
         Optional<Book> bookResult = bookRepository.findById(bookUploaded.getBookId());
         assertFalse(bookResult.isPresent());
-        assertEquals(0, bookRepository.count());
+        assertEquals(booksCount, bookRepository.count());
 
     }
 
@@ -132,7 +133,7 @@ public class BookStoreRepositoryTest {
         expectedBooks.add(bookResult1);
         expectedBooks.add(bookResult3);
 
-        Iterable<Book> actualBooks = bookRepository.filterBooksByStreamAuthorPublisherYearOfPublicationBookName(
+        Iterable<Book> actualBooks = bookRepository.filterBooksByParameters(
                 "Engineering", null,null,null,null
         );
 
@@ -151,7 +152,7 @@ public class BookStoreRepositoryTest {
         expectedBooks.add(bookResult1);
         expectedBooks.add(bookResult2);
 
-        Iterable<Book> actualBooks = bookRepository.filterBooksByStreamAuthorPublisherYearOfPublicationBookName(
+        Iterable<Book> actualBooks = bookRepository.filterBooksByParameters(
                 null, null,null, Long.valueOf(2020),null
         );
 

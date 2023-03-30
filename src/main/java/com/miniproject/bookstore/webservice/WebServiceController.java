@@ -2,6 +2,7 @@ package com.miniproject.bookstore.webservice;
 
 import com.miniproject.bookstore.business.BookService;
 import com.miniproject.bookstore.data.Book;
+import com.miniproject.bookstore.data.Photo;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,17 +41,7 @@ public class WebServiceController {
         return this.bookService.filterBooks(stream, author, publisher, yearOfPublication, bookName);
     }
 
-    // New Get Mapping test
-   /* @GetMapping("/books")
-    public List<Book> filterBooksNew(
-            @RequestParam(value = "stream", required = false)String stream,
-            @RequestParam(value = "author", required = false)String author,
-            @RequestParam(value = "publisher", required = false)String publisher,
-            @RequestParam(value = "yearOfPublication", required = false)Long yearOfPublication,
-            @RequestParam(value= "bookName", required = false)String bookName
-    ){
-        return this.bookService.filterBooksNewService(stream, author, publisher, yearOfPublication, bookName);
-    }*/
+
 
     // 3. PUT - Update book details by id.
     @PutMapping(path= "/book/{id}", consumes = "application/json")
@@ -61,9 +52,34 @@ public class WebServiceController {
 
     // 4. DELETE - Delete book details by id .
     @DeleteMapping("/book/{id}")
-    public void deleteBook(@PathVariable Long id){
-        this.bookService.deleteBookById(id);
+    @ResponseStatus(HttpStatus.OK)
+    public Book deleteBook(@PathVariable Long id){
+        return this.bookService.deleteBookById(id);
     }
 
+    @PutMapping("/book/addPhoto")
+    @ResponseStatus(HttpStatus.OK)
+    public Book addPhotoToBook(
+            @RequestParam(name = "bookId")Long bookId,
+            @RequestParam(name = "photoId")Long photoId
+    ){
+        return this.bookService.addPhotoToBook(bookId, photoId);
+    }
+
+    @PostMapping("/photo")
+    public Photo addPhoto(@RequestBody Photo photo){
+        return this.bookService.addPhoto(photo);
+    }
+    // New Get Mapping test
+    /* @GetMapping("/books")
+    public List<Book> filterBooksNew(
+            @RequestParam(value = "stream", required = false)String stream,
+            @RequestParam(value = "author", required = false)String author,
+            @RequestParam(value = "publisher", required = false)String publisher,
+            @RequestParam(value = "yearOfPublication", required = false)Long yearOfPublication,
+            @RequestParam(value= "bookName", required = false)String bookName
+    ){
+        return this.bookService.filterBooksNewService(stream, author, publisher, yearOfPublication, bookName);
+    }*/
 
 }

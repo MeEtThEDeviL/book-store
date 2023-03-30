@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.miniproject.bookstore.business.BookService;
 import com.miniproject.bookstore.data.Book;
+import com.miniproject.bookstore.error.ErrorMessage;
+import com.miniproject.bookstore.error.exceptions.EntityNotFoundException;
 import com.miniproject.bookstore.webservice.WebServiceController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +42,8 @@ public class WebServiceControllerTest {
     private Book book3;
     private ObjectMapper mapper;
 
+    private ErrorMessage errorMessage;
+
     @InjectMocks
     private WebServiceController webServiceController;
 
@@ -52,6 +59,8 @@ public class WebServiceControllerTest {
         mapper = new ObjectMapper();
 
         mockMvc = MockMvcBuilders.standaloneSetup(webServiceController).build();
+
+        errorMessage = new ErrorMessage();
 
         book1.setBookId(1);
         book1.setBookName("Watchdog: kraken");
@@ -184,10 +193,35 @@ public class WebServiceControllerTest {
     }
 
     @Test
-    @DisplayName("Delete book by Id")
-    public void testDeleteMappingDeleteBookById(){
+    @DisplayName("Test DELETE mapping to delete book by present bookId")
+    public void testDeleteMappingDeleteBookById() throws Exception{
+        when(bookService.deleteBookById(anyLong())).thenReturn(book1);
 
+        mockMvc.perform(delete("/api/book/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookName").value(book1.getBookName()))
+                .andExpect(jsonPath("$.author").value(book1.getAuthor()))
+                .andDo(MockMvcResultHandlers.print());
+
+        verify(bookService, times(1)).deleteBookById(anyLong());
     }
 
+    /*
+    Write tests:
+    -post mapping:
+        - book name null
+        - year of publication -ve
+        - year of publication > current year
+        - add same book again
+        */
+
+/*
+     -put mapping:
+        - invalid year of publication
+        - absent book id
+
+     -delete mapping:
+        - absent book id
+     */
 
 }
